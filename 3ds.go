@@ -3,20 +3,14 @@ package fauxgl
 import (
 	"encoding/binary"
 	"io"
-	"os"
+	"net/http"
 )
 
-func Load3DS(filename string) (*Mesh, error) {
+func Load3DS(file http.File) (*Mesh, error) {
 	type ChunkHeader struct {
 		ChunkID uint16
 		Length  uint32
 	}
-
-	file, err := os.Open(filename)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
 
 	var vertices []Vector
 	var faces []*Triangle
@@ -72,7 +66,7 @@ func Load3DS(filename string) (*Mesh, error) {
 	return NewTriangleMesh(triangles), nil
 }
 
-func readSmoothingGroups(file *os.File, triangles []*Triangle) error {
+func readSmoothingGroups(file http.File, triangles []*Triangle) error {
 	groups := make([]uint32, len(triangles))
 	if err := binary.Read(file, binary.LittleEndian, &groups); err != nil {
 		return err
@@ -117,7 +111,7 @@ func readSmoothingGroups(file *os.File, triangles []*Triangle) error {
 	return nil
 }
 
-func readLocalAxis(file *os.File) (Matrix, error) {
+func readLocalAxis(file http.File) (Matrix, error) {
 	var m [4][3]float32
 	if err := binary.Read(file, binary.LittleEndian, &m); err != nil {
 		return Matrix{}, err
@@ -131,7 +125,7 @@ func readLocalAxis(file *os.File) (Matrix, error) {
 	return matrix, nil
 }
 
-func readVertexList(file *os.File) ([]Vector, error) {
+func readVertexList(file http.File) ([]Vector, error) {
 	var count uint16
 	if err := binary.Read(file, binary.LittleEndian, &count); err != nil {
 		return nil, err
@@ -147,7 +141,7 @@ func readVertexList(file *os.File) ([]Vector, error) {
 	return result, nil
 }
 
-func readFaceList(file *os.File, vertices []Vector) ([]*Triangle, error) {
+func readFaceList(file http.File, vertices []Vector) ([]*Triangle, error) {
 	var count uint16
 	if err := binary.Read(file, binary.LittleEndian, &count); err != nil {
 		return nil, err
@@ -164,7 +158,7 @@ func readFaceList(file *os.File, vertices []Vector) ([]*Triangle, error) {
 	return result, nil
 }
 
-func readNullTerminatedString(file *os.File) (string, error) {
+func readNullTerminatedString(file http.File) (string, error) {
 	var bytes []byte
 	buf := make([]byte, 1)
 	for {

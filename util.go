@@ -30,21 +30,21 @@ func LatLngToXYZ(lat, lng float64) Vector {
 
 func LoadMesh(path string) (*Mesh, error) {
 	ext := strings.ToLower(filepath.Ext(path))
+	// open file
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
 	switch ext {
 	case ".stl":
-		// open file
-		file, err := os.Open(path)
-		if err != nil {
-			return nil, err
-		}
 		defer file.Close()
 		return LoadSTL(file)
 	case ".obj":
-		return LoadOBJ(path)
+		return LoadOBJ(file)
 	case ".ply":
-		return LoadPLY(path)
+		return LoadPLY(file)
 	case ".3ds":
-		return Load3DS(path)
+		return Load3DS(file)
 	}
 	return nil, fmt.Errorf("unrecognized mesh extension: %s", ext)
 }

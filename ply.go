@@ -3,7 +3,7 @@ package fauxgl
 import (
 	"bufio"
 	"encoding/binary"
-	"os"
+	"net/http"
 	"strconv"
 	"strings"
 )
@@ -68,14 +68,7 @@ type plyElement struct {
 	properties []plyProperty
 }
 
-func LoadPLY(path string) (*Mesh, error) {
-	// open file
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
+func LoadPLY(file http.File) (*Mesh, error) {
 	// read header
 	reader := bufio.NewReader(file)
 	var element plyElement
@@ -138,7 +131,7 @@ func LoadPLY(path string) (*Mesh, error) {
 	}
 }
 
-func loadPlyAscii(file *os.File, elements []plyElement) (*Mesh, error) {
+func loadPlyAscii(file http.File, elements []plyElement) (*Mesh, error) {
 	scanner := bufio.NewScanner(file)
 	var vertexes []Vector
 	var triangles []*Triangle
@@ -181,7 +174,7 @@ func loadPlyAscii(file *os.File, elements []plyElement) (*Mesh, error) {
 	return NewTriangleMesh(triangles), nil
 }
 
-func loadPlyBinary(file *os.File, elements []plyElement, order binary.ByteOrder) (*Mesh, error) {
+func loadPlyBinary(file http.File, elements []plyElement, order binary.ByteOrder) (*Mesh, error) {
 	var vertexes []Vector
 	var triangles []*Triangle
 	for _, element := range elements {
@@ -235,12 +228,12 @@ func loadPlyBinary(file *os.File, elements []plyElement, order binary.ByteOrder)
 	return NewTriangleMesh(triangles), nil
 }
 
-func readPlyInt(file *os.File, order binary.ByteOrder, dataType plyDataType) (int, error) {
+func readPlyInt(file http.File, order binary.ByteOrder, dataType plyDataType) (int, error) {
 	value, err := readPlyFloat(file, order, dataType)
 	return int(value), err
 }
 
-func readPlyFloat(file *os.File, order binary.ByteOrder, dataType plyDataType) (float64, error) {
+func readPlyFloat(file http.File, order binary.ByteOrder, dataType plyDataType) (float64, error) {
 	switch dataType {
 	case plyInt8:
 		var value int8

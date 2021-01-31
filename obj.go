@@ -2,7 +2,7 @@ package fauxgl
 
 import (
 	"bufio"
-	"os"
+	"net/http"
 	"strconv"
 	"strings"
 )
@@ -16,12 +16,7 @@ func parseIndex(value string, length int) int {
 	return n
 }
 
-func LoadOBJ(path string) (*Mesh, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
+func LoadOBJ(file http.File) (*Mesh, error) {
 	vs := make([]Vector, 1, 1024)  // 1-based indexing
 	vts := make([]Vector, 1, 1024) // 1-based indexing
 	vns := make([]Vector, 1, 1024) // 1-based indexing
