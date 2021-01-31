@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"io"
 	"math"
+	"net/http"
 	"os"
 	"runtime"
 	"strings"
@@ -20,7 +21,7 @@ type STLTriangle struct {
 	_             uint16
 }
 
-func LoadSTL(file *os.File) (*Mesh, error) {
+func LoadSTL(file http.File) (*Mesh, error) {
 	// get file size
 	info, err := file.Stat()
 	if err != nil {
@@ -49,7 +50,7 @@ func LoadSTL(file *os.File) (*Mesh, error) {
 	}
 }
 
-func loadSTLA(file *os.File) (*Mesh, error) {
+func loadSTLA(file http.File) (*Mesh, error) {
 	var vertexes []Vector
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
@@ -76,7 +77,7 @@ func makeFloat(b []byte) float64 {
 	return float64(math.Float32frombits(binary.LittleEndian.Uint32(b)))
 }
 
-func loadSTLB(file *os.File) (*Mesh, error) {
+func loadSTLB(file http.File) (*Mesh, error) {
 	r := bufio.NewReader(file)
 	header := STLHeader{}
 	if err := binary.Read(r, binary.LittleEndian, &header); err != nil {
