@@ -20,14 +20,7 @@ type STLTriangle struct {
 	_             uint16
 }
 
-func LoadSTL(path string) (*Mesh, error) {
-	// open file
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
+func LoadSTL(file *os.File) (*Mesh, error) {
 	// get file size
 	info, err := file.Stat()
 	if err != nil {

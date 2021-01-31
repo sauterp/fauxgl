@@ -32,7 +32,13 @@ func LoadMesh(path string) (*Mesh, error) {
 	ext := strings.ToLower(filepath.Ext(path))
 	switch ext {
 	case ".stl":
-		return LoadSTL(path)
+		// open file
+		file, err := os.Open(path)
+		if err != nil {
+			return nil, err
+		}
+		defer file.Close()
+		return LoadSTL(file)
 	case ".obj":
 		return LoadOBJ(path)
 	case ".ply":
